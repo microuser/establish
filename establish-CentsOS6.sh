@@ -31,7 +31,7 @@ add_host(){
         echo "    CustomLog $rootpath/access_log common "                       >> $filepathhttp
         echo "</VirtualHost> "                                                  >> $filepathhttp	
 
-        if [ "$servername" == "$hostname" ]; then
+        if [ "$servername" != "$hostname" ]; then
             echo "<VirtualHost *:$port>"                                        >> $filepathhttp
             echo "    ServerName $hostname"                                     >> $filepathhttp
             echo "    Redirect permanent / http://www.$hostname"                >> $filepathhttp
