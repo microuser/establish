@@ -149,13 +149,14 @@ fi
 
 
 
-dialog 	--title "Make SSH Sudo User of group Developers" --yesno "Make SSH Sudo User of group Developers, part of uploaders group for use at /srv/www" 7 60
+dialog 	--title "Make SSH Sudo User of group Developers" --yesno "" 7 60
 if [ $? == 0 ]; then #0 means yes
 	touch /tmp/form
 	while [ -f "/tmp/form" ]
 	do
-		dialog 	--title "Add a SSH User" --yesno "Add a SSH User" 7 60
+		dialog 	--title "Add a SSH User" --yesno "Make SSH Sudo User of group Developers, part of uploaders group for use at /srv/www" 7 60
 		if [ $? == 0 ]; then #0 means yes
+			echo "" > /tmp/form
 			user=""
 			dialog --ok-label "Submit" \
 				  --backtitle "Add a SSH User" \
@@ -164,12 +165,17 @@ if [ $? == 0 ]; then #0 means yes
 			15 80 0 \
 				"Username:" 	1 1	"$user" 	1 15 50 0 \
 			2>/tmp/form
-	
-			user=`sed -n '1p' /tmp/form`
-			#Add the ssh user
-			useradd $user
-			passwd $user
-			usermod -a -G developers $user		
+			confirmed=$?
+			if [ $confirmed == "0" ]; then
+				user=`sed -n '1p' /tmp/form`
+				#Add the ssh user
+				useradd $user
+				passwd $user
+				usermod -a -G developers $user	
+			else
+				#stop the loop by removing the response file
+				rm -f /tmp/form
+			fi
 		else
 	                #stop the loop by removing the response file
 			rm -f /tmp/form
