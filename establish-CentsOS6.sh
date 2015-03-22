@@ -161,7 +161,7 @@ if [ $? == 0 ]; then #0 means yes
 			dialog --ok-label "Submit" \
 				  --backtitle "Add a SSH User" \
 				  --title "Host a SSH User" \
-				  --form "This SSH user will be part of the developers group which can login remotly to upload files to the /srv/www/ directory" \
+				  --form "This SSH user will be part of the developers group which can login remotly to upload files to the /srv/www/ directory. Note that you can create user accounts with upload access limited specific to the domain later on during virtualhost configuration" \
 			15 80 0 \
 				"Username:" 	1 1	"$user" 	1 15 50 0 \
 			2>/tmp/form
