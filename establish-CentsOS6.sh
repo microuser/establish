@@ -100,12 +100,34 @@ add_host(){
   fi
 }
 
+yum -y install dialog
+
+dialog --backtitle "\Z1WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING "\
+        --colors \
+        --title "\Z7 Establish - CentOS6 Webserver Deployment"\
+        --yesno "\Z1    Establish is a system configuration script which will assist in initial\
+ web server configuration of the traditional LAMP stack. It assumes a clean image of CentOS 6\
+ with no prior changes.\n    It will configure apache for hosting of multiple php applictions\
+ with http and https configurations using self signed certificates. Creating of domains with\
+ www.domain.com as well as subdomains are supported. \n\
+    At the end of the process the script will look through creation of domains for which it will\
+ write VirtualHost definations for www redirects for non-subdomain hosts as well as http and https\
+ accessability. This program can be run multiple times reasonably safely, It is suggested that you\
+ backup your own files, not that there should be any to backup since it is only to be ran on a server\
+ with zero-configuration, straight from the system install. Project URL: https://github.com/microuser/establish\n\
+\Zb\Z0Features: Apache with SSL Certificates, PHP5.5 with Modules, MYSQL, SSH Account Creation for uploads, \
+VirtualHost Wizard for multiple creating multiple sites on a single IP.\n\
+    \ZB\Z1          Select YES to continue with installation"\
+        21 78
+
+if [ $? != 0 ]; then #0 means yes
+        exit 0
+fi
+
+
 ##http://www.rackspace.com/knowledge_center/article/installing-mysql-server-on-centos
 yum -y update
 yum -y install nano
-yum -y install dialog
-
-
 
 dialog 	--title "Make a developers group" --yesno "Make a developers group and /srv/www folder" 7 60
 if [ $? == 0 ]; then #0 means yes
@@ -280,3 +302,4 @@ do
 		rm -f /tmp/form
 	fi
 done
+exit 0
