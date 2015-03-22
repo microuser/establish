@@ -149,10 +149,30 @@ fi
 
 dialog 	--title "Make SSH user" --yesno "Make SSH user with sudo and part of groupdevelopers" 7 60
 if [ $? == 0 ]; then #0 means yes
-	#Add the ssh user
-	useradd user
-	passwd user
-	usermod -a -G developers user
+	touch /tmp/form
+	while [ -f "/tmp/form" ]
+	do
+		dialog 	--title "Add a SSH User" --yesno "Add a SSH User" 7 60
+		if [ $? == 0 ]; then #0 means yes
+			user=""
+			dialog --ok-label "Submit" \
+				  --backtitle "Add a SSH User" \
+				  --title "Host a SSH User" \
+				  --form "This SSH user will be part of the developers group which can login remotly to upload files to the /srv/www/ directory" \
+			15 80 0 \
+				"Username:" 	1 1	"$user" 	1 15 50 0 \
+			2>/tmp/form
+	
+			user=`sed -n '1p' /tmp/form`
+			#Add the ssh user
+			useradd user
+			passwd user
+			usermod -a -G developers user		
+		else
+	                #stop the loop by removing the response file
+			rm -f /tmp/form
+		fi
+	done
 fi
 
 
@@ -254,11 +274,6 @@ if [ $? == 0 ]; then #0 means yes
         echo "Listen 80" > /etc/httpd/conf.d/http.conf
         echo "NameVirtualHost *:80" >> /etc/httpd/conf.d/http.conf
         echo "Include sites.d/*-80.conf" >> /etc/httpd/conf.d/http.conf
-
-        sslCert="/etc/httpd/ssl/apache.crt"
-	sslKey="/etc/httpd/ssl/apache.key"
-	#create the certificate and the key to protect it
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout $sslKey -out $sslCert
 fi
 
 
