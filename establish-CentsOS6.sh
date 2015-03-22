@@ -94,7 +94,7 @@ add_host(){
 	echo "SSL Error Log" >> $rootpath/ssl_error_log
 	echo "SSL Access Log" >> $rootpath/ssl_access_log
 	echo "SSL Transfer Log" >> $rootpath/ssl_transfer_log
-	chown -Rv apache:developers $rootpath
+	chown -Rv apache:uploaders $rootpath
 	chmod -Rv 760 $rootpath
 	service httpd reload
   fi
@@ -132,22 +132,24 @@ yum -y install nano
 dialog 	--title "Make a developers group" --yesno "Make a developers group and /srv/www folder" 7 60
 if [ $? == 0 ]; then #0 means yes
 	groupadd developers
+	groupadd uploaders
 
 	#Add developers group sudo access
 	echo "%developers        ALL=(ALL)       NOPASSWD: ALL" > /etc/sudoers.d/developers 
 	mkdir -pv /srv
 	mkdir -pv /srv/www/
-	chown -Rv apache:developers /srv
+	chown -Rv apache:uploaders /srv
 	chmod -Rv 760 /srv
 	
 	#Add apache to group
-	usermod -a -G developers apache
+	usermod -a -G uploaders apache
+	usermod -a -G uploaders developers
 fi
 
 
 
 
-dialog 	--title "Make SSH user" --yesno "Make SSH user with sudo and part of groupdevelopers" 7 60
+dialog 	--title "Make SSH Sudo User of group Developers" --yesno "Make SSH Sudo User of group Developers, part of uploaders group for use at /srv/www" 7 60
 if [ $? == 0 ]; then #0 means yes
 	touch /tmp/form
 	while [ -f "/tmp/form" ]
