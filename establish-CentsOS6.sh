@@ -165,9 +165,9 @@ if [ $? == 0 ]; then #0 means yes
 	
 			user=`sed -n '1p' /tmp/form`
 			#Add the ssh user
-			useradd user
-			passwd user
-			usermod -a -G developers user		
+			useradd $user
+			passwd $user
+			usermod -a -G developers $user		
 		else
 	                #stop the loop by removing the response file
 			rm -f /tmp/form
