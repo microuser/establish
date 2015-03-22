@@ -62,7 +62,7 @@ add_host(){
         echo '    SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0'>> $filepathhttps
         echo "</VirtualHost> "                                                  >> $filepathhttps	
 
-        if [ "$servername" == "$hostname" ]; then
+        if [ "$servername" != "$hostname" ]; then
             echo "<VirtualHost *:443>"                                          >> $filepathhttps
             echo "    ServerName $hostname"                                     >> $filepathhttps
             echo "    Redirect permanent / https://www.$hostname"               >> $filepathhttps
