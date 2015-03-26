@@ -2,7 +2,7 @@
 
 yum -y install tmux wemux git
 
-dialog --yesno "Do you want to install wemux" 20 20
+dialog --yesno "Do you want to install wemux vi vim" 20 20
 if [ "$?" == "0"]; then
   #https://netguru.co/blog/what-s-a-pair-to-do-pair
   echo "set -g mode-mouse on" >> ~/.tmux.conf
