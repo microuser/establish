@@ -3,7 +3,7 @@
 yum -y install tmux wemux git
 
 dialog --yesno "Do you want to install wemux" 20 20
-if [ $? ]; then
+if [ "$?" == "0"]; then
   #https://netguru.co/blog/what-s-a-pair-to-do-pair
   echo "set -g mode-mouse on" >> ~/.tmux.conf
   echo "set -g mouse-resize-pane on" >> ~/.tmux.conf
@@ -14,7 +14,7 @@ if [ $? ]; then
 fi
 
 dialog --yesno "Do you want to install Vimified" 20 20
-if [ $? ]; then
+if [ "$?" == "0" ]; then
   #Get Vimified
   #https://github.com/zaiste/vimified
   #curl -L https://raw.github.com/zaiste/vimified/master/install.sh | sh
