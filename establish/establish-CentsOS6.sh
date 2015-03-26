@@ -4,29 +4,32 @@ chjail_user(){
 username=$1
 domainname=$2
 
-#http://khmel.org/?p=624
-#http://superuser.com/questions/370953/how-to-not-allow-user-outside-of-home-directory-with-sftp
-###http://askubuntu.com/questions/134425/how-can-i-chroot-sftp-only-ssh-users-into-their-homes
 
 mkdir -p /home/$username
 echo "$username" > /home/$username/THIS_USER_IS_CHROOTED
+
+#Make user and add him to uploaders group
 useradd -d /home/$username -M -N -g uploaders $username
+
+#Make user use the sftp shell
 usermod -s "/usr/libexec/openssh/sftp-server" $username
+
+#For a CHJAIL, the owner of the folder needs to be root:root
 chown root:root /home/$username
-chmod 755 /home/$username
-#ln -s /srv/www/$domainname /home/$username/public_html
 
+chmod 750 /home/$username
 
+#We need to "mount --bind" the folder, because symbolic links don't work
 bindString="/srv/www/$domainname /home/$username/public_html none bind"
 if [ "`grep "$bindString" /etc/ssh/sshd_config | wc -l `" == "0" ]; then
-    mkdir -p /home/$username/public_html
-    chown -h $username:uploaders /home/$username/public_html
+    mkdir -v -p /home/$username/public_html
+    chown -v -h $username:uploaders /home/$username/public_html
     chmod 755 /home/$username/public_html
-    echo  fstab entry
     echo "$bindString" >> /etc/fstab;
     mount -a
 fi
 
+#Set that password
 passwd $username
 
 #If "Subsystem sftp /usr/lib/openssh/sftp-server" starts the line, then comment out and replace "Subsystem sftp internal-sftp"
@@ -70,7 +73,7 @@ add_host(){
         
         echo "<VirtualHost *:$port>"                                            > $filepathhttp
         echo "    ServerAdmin webmaster@$hostname"                              >> $filepathhttp
-        echo "    DocumentRoot $rootpath"                                       >> $filepathhttp
+        echo "    DocumentRoot $rootpath/html"                                       >> $filepathhttp
         echo "    ServerName $servername"                                       >> $filepathhttp
         echo "    #ServerAlias $servername"                                     >> $filepathhttp
         echo "    ErrorLog $rootpath/error_log "                                >> $filepathhttp
