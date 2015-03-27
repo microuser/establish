@@ -265,7 +265,7 @@ if [ $? == 0 ]; then #0 means yes
     ##php55w-ldap 	
     ##php55w-mbstring 	
     ##php55w-mcrypt 	
-    ##php55w-mssql 	
+    yum -y install php55w-mssql 	
     ##php55w-mysql 	php-mysqli, php_database
     ##php55w-mysqlnd 	php-mysqli, php_database
     ##php55w-odbc 	php-pdo_odbc, php_database
