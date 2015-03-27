@@ -132,7 +132,6 @@ add_host(){
             echo "</VirtualHost> "                                              >> $filepathhttps	
         fi
 
-
 	dialog --title "$filepathhttps" --textbox "$filepathhttps" 20 80
         dialog --title "$filepathhttp" --textbox "$filepathhttp" 20 80
 	mkdir -pv $rootpath
