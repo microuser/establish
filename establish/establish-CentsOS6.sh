@@ -137,6 +137,9 @@ add_host(){
         dialog --title "$filepathhttp" --textbox "$filepathhttp" 20 80
 	mkdir -pv $rootpath
 	mkdir -pv $rootpath/html
+        ln -s $rootpath/html $rootpath/webroot
+        chown -h apache:uploaders $rootpath/webroot
+        chown -h 770 $rootpath/webroot
 	mkdir -pv $rootpath/cgi-bin
 	echo "<html><body><h1>$hostname</h1></body></html>" > $rootpath/html/index.html
 	echo "Error Log" >> $rootpath/error_log
