@@ -402,5 +402,91 @@ do
         rm -f /tmp/form
     fi
 done
+
+
+
+
+dialog 	--title "Configure SMTP Mail (Postfix, SASL+TLS, Squirrelmail" --yesno "Mail" 7 60
+if [ $? == 0 ]; then #0 means yes
+    
+    yum -y remove sendmail
+    yum -y install postfix
+    yum -y install cyrus-sasl
+    yum -y install dovecot
+
+    yum -y install epel-release
+    yum -y install squirrelmail
+    
+
+        alreadyRan=`grep "smtpd_sasl_auth_enable = yes" /etc/ssh/sshd_config | wc -l `
+        if [ "$alreadyRan" == "0" ]; then
+
+            rm -f /tmp/form
+            touch /tmp/form
+            domainname="mail.domain.tld"
+            dialog --ok-label "Submit" \
+                      --backtitle "Make the mail listen to the domain name" \
+                      --title "Host Add" \
+                      --form "Add an apache virtual host" \
+            15 80 0 \
+                    "DomainName:" 	1 1	"$domainname" 	1 15 50 0 \
+            2>/tmp/form
+
+            domainname=`sed -n '1p' /tmp/form `
+
+            ##Configure Host
+            sed -i "s&^#myhostname = host.domain.tld&myhostname = $domainname&g" /etc/postfix/main.cf
+            sed -i "s&^#mydomain = host.domain.tld&myhostname = $domainname&g" /etc/postfix/main.cf
+            sed -i 's&^#myorigin = $mydomain&myorigin = $mydomain&g' /etc/postfix/main.cf
+            sed -i 's&^#inet_interfaces = all&inet_interfaces = all&g' /etc/postfix/main.cf
+            sed -i 's&^mydestination = $myhostname, localhost.$mydomain, localhost&mydestination = $myhostname, $mydomain&g' /etc/postfix/main.cf
+
+            ##Configure SMTPD 
+            echo "smtpd_sasl_auth_enable = yes" >> /etc/postfix/main.cf
+            echo "smtpd_recipient_restrictions = permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination" >> /etc/postfix/main.cf
+            echo "smtpd_sasl_security_options = noanonymous" >> /etc/postfix/main.cf
+            echo "smtpd_sasl_type = dovecot" >> /etc/postfix/main.cf
+            echo "smtpd_sasl_path = private/auth" >> /etc/postfix/main.cf
+
+            ##Configure dovecot
+            sed -i "s&^#protocols = imap pop3 lmtp&protocols = imap imaps pop3 pop3s&g" /etc/dovecot/dovecot.conf
+            sed -i "s&^#disable_plaintext_auth = yes&disable_plaintext_auth = yes&g" /etc/dovecot/conf.d/10-auth.conf
+            
+
+
+            rm -f /tmp/form
+            touch /tmp/form
+            domainname=`echo "$domainname" | sed "s&mail.&webmail.&g"`
+            dialog --ok-label "Submit" \
+                      --backtitle "Make the webinterface" \
+                      --title "Host Add" \
+                      --form "Add an apache virtual host" \
+            15 80 0 \
+                    "DomainName:" 	1 1	"$domainname" 	1 15 50 0 \
+            2>/tmp/form
+
+            domainname=`sed -n '1p' /tmp/form `
+
+
+            ##Configure Squirrelmail
+            add_host $domainname 80
+            
+            dialog --msgbox "You will need to navigate the following configuration and set your hostname, and set to SMTP, among other preferences" 40 30
+            
+
+        else
+            dialog --msgbox "You will need to manually edit /etc/postfix/main.cf to add multiple entries to myhostname or mydomain" 60 20
+        fi
+        /usr/share/squirrelmail/config/conf.pl
+
+        /etc/init.d/postfix start
+        /etc/init.d/dovecot start
+        /etc/init.d/saslauthd start
+        service httpd restart
+        
+fi
+
+
+
 exit 0
 
