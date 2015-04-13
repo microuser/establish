@@ -76,10 +76,9 @@ mysql_secure_installation
 
 #nano /etc/httpd/conf.d/phpMyAdmin.conf
 
-    perl -0777 -pi -e "s&<Directory /usr/share/phpMyAdmin/>\n   AddDefaultCharset UTF-8\n\n   <IfModule mod_authz_core.c>\n     # Apache 2.4\n     <RequireAny>\n       Require ip 127.0.0.1\n       Require ip ::1\n     </RequireAny>&<Directory /usr/share/phpMyAdmin/>\n   AddDefaultCharset UTF-8\n\n   <IfModule mod_authz_core.c>\n     # Apache 2.4\n     <RequireAny>\n       #Require ip 127.0.0.1\n       #Require ip ::1\n        Require all granted\n     </RequireAny>&g" /etc/httpd/conf.d/phpMyAdmin.conf
+perl -0777 -pi -e "s&<Directory /usr/share/phpMyAdmin/>\n   AddDefaultCharset UTF-8\n\n   <IfModule mod_authz_core.c>\n     # Apache 2.4\n     <RequireAny>\n       Require ip 127.0.0.1\n       Require ip ::1\n     </RequireAny>&<Directory /usr/share/phpMyAdmin/>\n   AddDefaultCharset UTF-8\n\n   <IfModule mod_authz_core.c>\n     # Apache 2.4\n     <RequireAny>\n       #Require ip 127.0.0.1\n       #Require ip ::1\n        Require all granted\n     </RequireAny>&g" /etc/httpd/conf.d/phpMyAdmin.conf
 
-    sed -i "s#     = 'cookie'#     = 'http'#g" /etc/phpMyAdmin/config.inc.php
-
+sed -i "s#     = 'cookie'#     = 'http'#g" /etc/phpMyAdmin/config.inc.php
 
 systemctl enable  httpd.service
 systemctl restart  httpd.service
@@ -510,3 +509,96 @@ echo '$config["spellcheck_engine"] = "pspell";' >> /etc/roundcubemail/config.inc
 
 ####Remove Installation folder
 
+
+
+echo '#                 ' > /etc/httpd/conf.d/roundcubemail.conf
+echo '# Round Cube Webmail is a browser-based multilingual IMAP client' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo 'Alias /roundcubemail /usr/share/roundcubemail' >> /etc/httpd/conf.d/roundcubemail.conf
+echo 'Alias /webmail /usr/share/roundcubemail' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '# Define who can access the Webmail' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '# You can enlarge permissions once configured' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#<Directory /usr/share/roundcubemail/>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#    <IfModule mod_authz_core.c>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        # Apache 2.4' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Require local' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#    </IfModule>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#    <IfModule !mod_authz_core.c>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        # Apache 2.2' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Order Deny,Allow' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Deny from all' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Allow from 127.0.0.1' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Allow from ::1' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#    </IfModule>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#</Directory>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '<Directory /usr/share/roundcubemail/>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Options none' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        AllowOverride Limit' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Require all granted' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '</Directory>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '# Define who can access the installer' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '# keep this secured once configured' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '<Directory /usr/share/roundcubemail/installer/>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    <IfModule mod_authz_core.c>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        # Apache 2.4' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Require local' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    </IfModule>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    <IfModule !mod_authz_core.c>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        # Apache 2.2' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Order Deny,Allow' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Deny from all' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Allow from 127.0.0.1' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '        Allow from ::1' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    </IfModule>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '</Directory>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#<Directory /usr/share/roundcubemail/installer>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Options none' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        AllowOverride Limit' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#        Require all granted' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '#</Directory>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '# Those directories should not be viewed by Web clients.' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '<Directory /usr/share/roundcubemail/bin/>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    Order Allow,Deny' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    Deny from all' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '</Directory>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '<Directory /usr/share/roundcubemail/plugins/enigma/home/>' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    Order Allow,Deny' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '    Deny from all' >> /etc/httpd/conf.d/roundcubemail.conf
+echo '</Directory>' >> /etc/httpd/conf.d/roundcubemail.conf
+
+
+systemctl restart httpd.service
+
+
+
+
+
+
+
+
+
+cd /tmp
+wget http://www.ispconfig.org/downloads/ISPConfig-3-stable.tar.gz
+tar xfz ISPConfig-3-stable.tar.gz
+cd ispconfig3_install/install/
+
+
+
+
+
+
+#Login to https://192.168.0.xxx:8080
+#using admin
+#with password admin
+#Goto Tools, and change you Password
+
+#kL7oIzhE0lJ5
