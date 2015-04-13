@@ -305,7 +305,7 @@ dialog 	--title "Configure Apache & SSL" --yesno "Configure Apache & SSL" 7 60
 if [ $? == 0 ]; then #0 means yes
     chkconfig mysqld on
 
-    yum install mod_ssl
+    yum -y install mod_ssl
     mkdir -pv /etc/httpd/ssl
     mkdir -pv /etc/httpd/sites.d
     #mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf.bk
@@ -406,7 +406,7 @@ done
 
 
 
-dialog 	--title "Configure SMTP Mail (Postfix, SASL+TLS, Squirrelmail" --yesno "Mail" 7 60
+dialog 	--title "Configure SMTP Mail (Postfix, SASL+TLS, Squirrelmail" --yesno "Configure SMTP Mail (Postfix, SASL+TLS, Squirrelmail" 7 60
 if [ $? == 0 ]; then #0 means yes
     
     yum -y remove sendmail
@@ -417,6 +417,7 @@ if [ $? == 0 ]; then #0 means yes
     yum -y install epel-release
     yum -y install squirrelmail
     
+#http://www.mysql-apache-php.com/mailserver.htm
 
         alreadyRan=`grep "smtpd_sasl_auth_enable = yes" /etc/ssh/sshd_config | wc -l `
         if [ "$alreadyRan" == "0" ]; then
@@ -470,6 +471,30 @@ if [ $? == 0 ]; then #0 means yes
 
             ##Configure Squirrelmail
             add_host $domainname 80
+
+            #Correct the way add_host works and point the document root to the default directory
+            sed -i '' /etc/httpd/sites.d/$domainname-80.conf
+            sed -i '' /etc/httpd/sites.d/$domainname-443.conf
+            
+            rm -fv /srv/www/$domainname/html/index.html
+            rm -Rfv /srv/www/$domainname/html
+            ln -s /usr/share/squirrelmail /srv/www/$domainname/html
+
+            mkdir -pv /etc/httpd/ssl/$domainname
+            sslCert="/etc/httpd/ssl/$domainname/apache.crt"
+            sslKey="/etc/httpd/ssl/$domainname/apache.key"
+            sslSkip="0"
+
+            if [ -e "$sslCert" ] && [ -e "$sslKey" ]; then
+                dialog 	--title "A SSL Cert Already Exists." --yesno "A SSL Cert Already Exits. SKIP the creation, and use the existing one?" 7 60
+                if [ $? == 0 ]; then
+                    sslSkip="1"
+                fi
+            fi
+            if [ "$sslSkip" == "0" ]; then
+                #create the certificate and the key to protect it
+                openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout $sslKey -out $sslCert
+            fi
             
             dialog --msgbox "You will need to navigate the following configuration and set your hostname, and set to SMTP, among other preferences" 40 30
             
@@ -483,7 +508,47 @@ if [ $? == 0 ]; then #0 means yes
         /etc/init.d/dovecot start
         /etc/init.d/saslauthd start
         service httpd restart
-        
+#        
+#    8  yum install -y nano
+#    9  yum update
+#   10  yum install htop
+#   11  wget https://raw.githubusercontent.com/microuser/establish/master/establish/establish-CentsOS6.sh
+#   12  chmod +x establish-CentsOS6.sh 
+#   13  ./establish-CentsOS6.sh 
+#   14  yum install postfix
+#   15  service sendmail stop
+#   16  yum remove sendmail
+#   17  yum install nano
+#   18  nano /etc/postfix/main.cf
+#   19  service postfix start
+#   20  echo test mail | mail -s "test"  leo@techarena51.com && sudo tail -f /var/log/maillog
+#   21  nano /etc/postfix/main.cf
+#   22  service postfix start
+#   23  echo test mail | mail -s "test"  leo@techarena51.com && sudo tail -f /var/log/maillog
+#   24  curl -s --user 'api:key-ff6aaff1facef6679383cf2a797ac0cf'     https://api.mailgun.net/v3/sandbox41ef75b6cdc1438b9c1103d32e0e8c1e.mailgun.org/messages     -F from='Mailgun Sandbox <postmaster@sandbox41ef75b6cdc1438b9c1103d32e0e8c1e.mailgun.org>'     -F to='Paul Richeson <pauleagle@gmail.com>'    -F subject='Hello Paul Richeson'     -F text='Congratulations Paul Richeson, you just sent an email with Mailgun!  You are truly awesome! 
+#
+ #  25  curl -s --user 'api:key-ff6aaff1facef6679383cf2a797ac0cf'     https://api.mailgun.net/v3/sandbox41ef75b6cdc1438b9c1103d32e0e8c1e.mailgun.org/messages     -F from='Mailgun Sandbox <postmaster@sandbox41ef75b6cdc1438b9c1103d32e0e8c1e.mailgun.org>'     -F to='Paul Richeson <pauleagle@gmail.com>'    -F subject='Hello Paul Richeson'     -F text='Congratulations Paul Richeson, you just sent an email with Mailgun!  You are truly awesome! 
+#
+#   26  curl -s --user 'api:key-ff6aaff1facef6679383cf2a797ac0cf'     https://api.mailgun.net/v3/sandbox41ef75b6cdc1438b9c1103d32e0e8c1e.mailgun.org/messages     -F from='Mailgun Sandbox <postmaster@sandbox41ef75b6cdc1438b9c1103d32e0e8c1e.mailgun.org>'     -F to='Paul Richeson <pauleagle@gmail.com>'    -F subject='Hello Paul Richeson'     -F text='Congratulations Paul Richeson, you just sent an email with Mailgun!  You are truly awesome! #
+#
+#You can see a record of this email in your logs: https://mailgun.com/cp/log #
+#You can send up to 300 emails/day from this sandbox server. Next, you should add your own domain so you can send 10,000 emails/month for free.'
+#   27  nano /etc/postfix/main.cf 
+#   28  yum install cyrus-sasl-plain
+#   29  service postfix restart
+#   30  yum install mod-ssl openssl
+#   31  openssl genrsa -out smtp.key 2048 
+#   32  openssl req -new -key smtp.key -out smtp.csr
+#   33  openssl x509 -req -days 365 -in smtp.csr -signkey smtp.key -out smtp.crt
+#   34  cp smtp.crt /etc/pki/tls/certs
+ #  35  cp smtp.key /etc/pki/tls/private/smtp.key
+ #  36  cp smtp.csr /etc/pki/tls/private/smtp.csr
+#   37  sudo nano /etc/postfix/main.cf
+#   38  service postfix restart
+#   39  echo test mail | mail -s "test" test@savedgames.net && sudo tail -f /var/log/maillog
+#
+
+
 fi
 
 
